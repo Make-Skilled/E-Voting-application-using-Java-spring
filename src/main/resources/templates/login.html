@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Voting App</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li class="active"><a href="/login">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <form th:action="@{/login}" method="post" class="form-horizontal">
+        <h2>Voter Login</h2>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="aadhar">Aadhar Number:</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="aadhar" name="aadhar" required pattern="\d{12}" title="Please enter valid 12-digit Aadhar number">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="mobileNumber">Mobile Number:</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="mobileNumber" name="mobileNumber" required pattern="\d{10}" title="Please enter valid 10-digit mobile number">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+        </div>
+
+        <div th:if="${err}" class="alert alert-danger">
+            <p th:text="${err}"></p>
+        </div>
+    </form>
+</div>
+</body>
+</html>

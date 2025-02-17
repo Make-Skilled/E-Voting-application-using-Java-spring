@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Admin Dashboard</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/admin/add-candidate">Add Candidate</a></li>
+                <li><a href="/admin/logout">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Search Form -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form th:action="@{/admin/dashboard}" method="get" class="form-inline">
+                <div class="form-group">
+                    <input type="text" name="pincode" class="form-control" placeholder="Enter Pincode" 
+                           pattern="\d{6}" title="Please enter a valid 6-digit pincode"
+                           th:value="${param.pincode}">
+                </div>
+                <button type="submit" class="btn btn-primary">Search</button>
+                <a href="/admin/dashboard" class="btn btn-default">Clear</a>
+            </form>
+        </div>
+    </div>
+
+    <h2>Candidates List</h2>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Party</th>
+                    <th>Pincode</th>
+                    <th>Vote Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="candidate : ${candidates}">
+                    <td>
+                        <img th:if="${candidate.imagePath}" th:src="${candidate.imagePath}" 
+                             alt="Candidate Image" style="max-width: 100px;">
+                    </td>
+                    <td th:text="${candidate.name}"></td>
+                    <td th:text="${candidate.partyName}"></td>
+                    <td th:text="${candidate.pincode}"></td>
+                    <td th:text="${candidate.voteCount}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

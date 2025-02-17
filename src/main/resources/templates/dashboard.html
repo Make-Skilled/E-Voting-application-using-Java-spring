@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #f8f9fa;
+        }
+        body {
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            margin-bottom: 20px;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 15px;
+        }
+        .btn-vote {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 10px 30px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .btn-vote:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.05);
+        }
+        .candidate-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin: 15px auto;
+            border: 3px solid var(--secondary-color);
+        }
+        .vote-count {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+        }
+        .welcome-text {
+            color: white;
+            font-weight: 300;
+        }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            background-color: var(--accent-color);
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="#"><i class="fas fa-vote-yea me-2"></i>Voter Dashboard</a>
+        <div class="d-flex align-items-center">
+            <span class="welcome-text me-3">Welcome, <span th:text="${user.fullName}"></span>!</span>
+            <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt me-1"></i>Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <!-- Vote Summary Card -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Vote Summary</h5>
+                    <small>Pincode: <span th:text="${user.pincode}"></span></small>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Party</th>
+                                    <th>Votes</th>
+                                    <th>Share</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="candidate : ${candidates}">
+                                    <td th:text="${candidate.partyName}"></td>
+                                    <td th:text="${candidate.voteCount}"></td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-primary" role="progressbar"
+                                                th:style="'width: ' + ${totalVotes > 0 ? candidate.voteCount * 100.0 / totalVotes : 0} + '%'"
+                                                th:text="${totalVotes > 0 ? #numbers.formatDecimal(candidate.voteCount * 100.0 / totalVotes, 1, 1) + '%' : '0%'}">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="table-info">
+                                    <td><strong>Total</strong></td>
+                                    <td><strong th:text="${totalVotes}"></strong></td>
+                                    <td><strong>100%</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Candidates Grid -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Available Candidates</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${hasVoted}" class="alert alert-success text-center mb-4">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Thank you for casting your vote!</strong>
+                    </div>
+                    <div class="row g-4">
+                        <div th:each="candidate : ${candidates}" class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <img th:if="${candidate.imagePath}" th:src="${candidate.imagePath}" 
+                                         class="candidate-img" alt="Candidate Image">
+                                    <h4 class="mt-3" th:text="${candidate.name}"></h4>
+                                    <p class="text-muted" th:text="${candidate.partyName}"></p>
+                                    <form th:if="${!hasVoted}" onsubmit="return confirmVote(event)" 
+                                          th:action="@{/vote}" method="post">
+                                        <input type="hidden" name="candidateId" th:value="${candidate.id}">
+                                        <button type="submit" class="btn btn-vote">
+                                            <i class="fas fa-vote-yea me-2"></i>Vote
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+function confirmVote(event) {
+    event.preventDefault();
+    const form = event.target;
+    
+    Swal.fire({
+        title: 'Confirm Your Vote',
+        text: 'Are you sure you want to cast your vote? This action cannot be undone.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3498db',
+        cancelButtonColor: '#e74c3c',
+        confirmButtonText: 'Yes, cast my vote!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+    return false;
+}
+
+const message = /*[[${message}]]*/ null;
+if (message) {
+    Swal.fire({
+        title: message.includes('Successfully') ? 'Success!' : 'Error!',
+        text: message,
+        icon: message.includes('Successfully') ? 'success' : 'error',
+        confirmButtonColor: '#3498db'
+    });
+}
+</script>
+</body>
+</html>
